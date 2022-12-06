@@ -81,11 +81,11 @@ export default function App() {
                                 </select>
                             </div>
                             <div className='middle_innerbox_row3_col2'>
-                                <label>Name {name}</label>
+                                <label>Name </label>
                                 <input type="text" placeholder='Name' value={name} onChange={(e) => { Changename(e) }} />
                             </div>
                             <div className='middle_innerbox_row3_col3'>
-                                <label>Mobile Number{mobile}</label>
+                                <label>Mobile Number</label>
                                 <input type="number" placeholder='Mobile Number' value={mobile} onChange={(e) => { Changemobile(e) }} />
                             </div>
                             <div className='middle_innerbox_row3_col4'>

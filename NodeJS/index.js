@@ -5,12 +5,12 @@ app.use(express.json())
 
 var mysql = require('mysql');
 var cors = require('cors');
-
+var jwt = require("jsonwebtoken")
 app.use(cors());
 
 var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
+    host: "matrimony.cqq4bhjahgx2.us-east-1.rds.amazonaws.com",
+    user: "admin",
     password: "password",
     database: "matrimony"
 });
@@ -24,11 +24,43 @@ app.post('/validate', (req, res) => {
     let matrimony = req.body.matrimony;
     let password = req.body.password;
     let sql = "SELECT * from tblusers where txtEmail='" + matrimony + "' and txtPassword='" + password + "' ;";
+    console.log(sql);
     con.query(sql, (err, result) => {
-        if (err) console.log("error");
-        res.send(result);
-    })
-})
+        if (err) throw err;
+        console.log(result);
+        const user={"id":result[0].id};
+        jwt.sign({user}, "secret", (err,token) => {
+            res.json({token})
+        });
+            
+        }
+    );
+});
+
+
+function verifyToken(req, res, next){
+    const bearerHeader = req.headers["authorization"]
+    console.log(JSON.stringify (bearerHeader) );
+    console.log(req.headers);
+    console.log("th",bearerHeader);
+    if (typeof bearerHeader !== "undefined"){
+        const bearerToken = bearerHeader.split(" ")[1];
+        req.token = bearerToken;
+
+        jwt.verify(bearerToken, "secret", (err, authData) => {
+            if(err){
+                res.sendStatus(403)
+            }
+            else{
+                next();
+            }
+        })
+    }
+    else{
+        res.sendStatus(403)
+    }
+}
+
 
 app.post('/insert', (req, res) => {
     let option = req.body.option;
@@ -76,7 +108,7 @@ app.post('/updateregister', (req, res) => {
     let mt = req.body.mt;
     let email = req.body.email;
     let password = req.body.password;
-    let sql = "update tblusers set dtDOB = '" + dob + "', refReligion = '" + deno + "', txtDiv = '" + div + "', refCaste = " + caste + ", refMotherTongue = " + mt + ", txtEmail = '" + email + "', txtPassword = '" + password + "' where id ='" + id + "' ";
+    let sql = "update tblusers set dtDOB = '" + dob + "', refReligion = '" + deno + "', txtDiv = '" + div + "', refCaste = '" + caste + "', refMotherTongue = '" + mt + "', txtEmail = '" + email + "', txtPassword = '" + password + "' where id ='" + id + "' ";
     con.query(sql, (err, result) => {
         if (err) throw err;
         res.send(result);
@@ -129,6 +161,10 @@ app.post('/fetchandcopyprofile', (req, res) => {
         console.log(result);
         res.send(result);
     })
+})
+
+app.post("/sample", verifyToken, (req, res) => {
+    res.send("Called sample");
 })
 
 app.listen(4000, function (err) {
